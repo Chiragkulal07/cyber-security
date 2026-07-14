@@ -32,7 +32,7 @@ const LoginPage = () => {
             <p className="font-medium text-cyan-300">Demo logins</p>
             <p className="mt-2">admin@demo.com / admin123</p>
             <p>analyst@demo.com / analyst123</p>
-            <p>auditor@demo.com / auditor123</p>
+            
           </div>
         </div>
 
