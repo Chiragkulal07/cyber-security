@@ -41,21 +41,42 @@ const demoUsers = [
 
 const seedUsers = async () => {
   try {
-    const count = await User.countDocuments();
-    if (count > 0) {
-      return;
+    const created = [];
+    const alreadyPresent = [];
+
+    for (const user of demoUsers) {
+      const existingUser = await User.findOne({ email: user.email.toLowerCase() });
+
+      if (existingUser) {
+        alreadyPresent.push(user.email);
+        continue;
+      }
+
+      const passwordHash = await bcrypt.hash(user.password, 10);
+      await User.create({
+        ...user,
+        email: user.email.toLowerCase(),
+        passwordHash,
+      });
+
+      created.push(user.email);
     }
 
-    const hashedUsers = await Promise.all(
-      demoUsers.map(async (user) => ({
-        ...user,
-        passwordHash: await bcrypt.hash(user.password, 10),
-      }))
-    );
+    console.log('Demo user seed summary:');
+    if (created.length > 0) {
+      console.log('Created:');
+      created.forEach((email) => console.log(`- ${email}`));
+    }
 
-    await User.insertMany(hashedUsers);
+    if (alreadyPresent.length > 0) {
+      console.log('Already present:');
+      alreadyPresent.forEach((email) => console.log(`- ${email}`));
+    }
 
-    console.log('Demo users seeded successfully.');
+    if (created.length === 0 && alreadyPresent.length === 0) {
+      console.log('No demo users processed.');
+    }
+
     console.log('Demo credentials:');
     demoUsers.forEach((user) => {
       console.log(`${user.email} / ${user.password} (${user.role})`);
